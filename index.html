@@ -209,6 +209,28 @@ const sfx = {
 };
 
 let timer = null;
+
+/* Reads part 1, a silent pause where the missing word is, then part 2 */
+function gapBeep(){
+  const a = ac(); if(!a) return;
+  const t = a.currentTime, o = a.createOscillator(), g = a.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(1000,t);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.16,t+.02);
+  g.gain.setValueAtTime(.16,t+.38); g.gain.exponentialRampToValueAtTime(0.0001,t+.42);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t+.45);
+}
+function sayWithGap(parts){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const mk = txt => { const u = new SpeechSynthesisUtterance(txt); u.lang="en-US"; u.rate=.9; return u; };
+    const first = parts[0].trim(), second = parts[1].trim();
+    // silent pause where the missing word is
+    const rest = ()=>{ if(second) setTimeout(()=>speechSynthesis.speak(mk(second)), 900); };
+    if(first){ const u = mk(first); u.onend = rest; speechSynthesis.speak(u); }
+    else rest();
+  }catch(e){}
+}
 function stopTimer(){ if(timer){clearInterval(timer);timer=null;} }
 
 /* ---------- Home ---------- */
@@ -314,7 +336,8 @@ function sentQ(){
     <div class="opts en">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>
     <div id="nx"></div>`;
   document.getElementById("back").onclick = home;
-  document.querySelector(".say").onclick = ()=>say(q.s.replace("___",q.a));
+  // before answering: read the sentence with a beep in the gap; after: read the full sentence
+  document.querySelector(".say").onclick = ()=> done ? say(q.s.replace("___", q.a)) : sayWithGap(parts);
   let done=false;
   $app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
     if(done) return; done=true;
