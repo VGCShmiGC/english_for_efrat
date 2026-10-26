@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>המשחק של אפרת – אנגלית בקטנה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2A1858; --paper:#FFF8FC; --pink:#FF4F9A; --sun:#FFD84D; --mint:#2FD3A6; --sky:#7FB8FF;
+  --card:#FFFFFF; --muted:#6B5C92; --wrong:#FF5B4A; --line:#2A1858;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F4ECFF; --paper:#1B1036; --card:#2A1C52; --muted:#B9A8E6; --line:#0B0620;
+    --pink:#FF6AAD; --sun:#FFD84D; --mint:#3FE0B4; --sky:#8FC2FF; --wrong:#FF7064;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F4ECFF; --paper:#1B1036; --card:#2A1C52; --muted:#B9A8E6; --line:#0B0620;
+  --pink:#FF6AAD; --sun:#FFD84D; --mint:#3FE0B4; --sky:#8FC2FF; --wrong:#FF7064;
+  color-scheme: dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Rubik",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:17px;line-height:1.5;
+  background-image:radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 1.2px,transparent 1.2px);background-size:18px 18px;min-height:100vh}
+.app{max-width:560px;margin:0 auto;padding:20px 18px 48px}
+h1,h2,.display{font-family:"Secular One","Rubik",system-ui,sans-serif;font-weight:400;margin:0}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"Rubik",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+
+/* Home */
+.hero{margin:12px 0 26px;position:relative}
+.hero h1{font-size:clamp(2.4rem,9vw,3.4rem);line-height:1.05}
+.hero p{margin:10px 0 0;color:var(--muted);max-width:30ch}
+.sticker{position:absolute;inset-inline-start:auto;inset-inline-end:-4px;top:-6px;transform:rotate(9deg);background:var(--sun);color:#2A1858;border:2.5px solid var(--line);
+  border-radius:999px;padding:6px 14px;font-family:"Secular One",sans-serif;box-shadow:3px 3px 0 var(--line);font-size:1rem}
+.modes{display:grid;gap:16px}
+.mode{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:14px;text-align:start;background:var(--card);border:2.5px solid var(--line);border-radius:20px;padding:16px;
+  box-shadow:5px 5px 0 var(--line);transition:transform .12s, box-shadow .12s}
+.mode:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--line)}
+.mode:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--line)}
+.mode .ico{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:2rem;border:2.5px solid var(--line)}
+.mode h2{font-size:1.35rem}
+.mode .desc{color:var(--muted);font-size:.95rem;margin-top:2px}
+.mode .best{font-size:.85rem;color:var(--muted);text-align:center;min-width:52px}
+.mode .best b{display:block;font-size:1.3rem;color:var(--ink);font-family:"Secular One",sans-serif;font-weight:400}
+
+/* Game chrome */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.back{background:none;border:2px solid var(--line);border-radius:999px;padding:6px 14px;background:var(--card)}
+.stat{font-family:"Secular One",sans-serif;font-size:1.2rem}
+.combo{background:var(--pink);color:#fff;border:2px solid var(--line);border-radius:999px;padding:2px 12px;font-size:1rem;margin-inline-start:6px}
+.bar{height:14px;border:2.5px solid var(--line);border-radius:999px;background:var(--card);overflow:hidden;margin-bottom:22px}
+.bar > i{display:block;height:100%;background:var(--mint);transition:width .1s linear}
+.bar.low > i{background:var(--wrong)}
+
+.word-card{position:relative;background:var(--card);border:3px solid var(--line);border-radius:26px;box-shadow:8px 8px 0 var(--pink);padding:34px 18px 28px;text-align:center;margin-bottom:24px;transform:rotate(-1.5deg)}
+.word-card .big{font-size:clamp(2.2rem,11vw,3.4rem);font-weight:700;line-height:1.1;word-break:break-word}
+.word-card .sub{color:var(--muted);margin-top:8px}
+.say{position:absolute;top:12px;inset-inline-start:12px;width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:var(--sun);color:#2A1858;font-size:1.15rem;display:grid;place-items:center}
+.pop{animation:pop .28s ease-out}
+@keyframes pop{0%{transform:rotate(-1.5deg) scale(.92)}70%{transform:rotate(-1.5deg) scale(1.03)}100%{transform:rotate(-1.5deg) scale(1)}}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{background:var(--card);border:2.5px solid var(--line);border-radius:16px;padding:16px 10px;font-size:1.1rem;font-weight:500;box-shadow:4px 4px 0 var(--line);min-height:64px}
+.opt:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--line)}
+.opt.ok{background:var(--mint);color:#13102A}
+.opt.no{background:var(--wrong);color:#fff}
+.opt[disabled]{cursor:default}
+
+.sentence{font-size:1.35rem;line-height:1.55;font-weight:500}
+.gap{display:inline-block;min-width:4.5em;border-bottom:3px dashed var(--pink);color:var(--pink)}
+.trans{margin-top:14px;color:var(--muted);font-size:1rem;min-height:1.5em}
+.next{display:block;width:100%;margin-top:18px;background:var(--ink);color:var(--paper);border:2.5px solid var(--line);border-radius:16px;padding:14px;font-family:"Secular One",sans-serif;font-size:1.2rem;box-shadow:4px 4px 0 var(--pink)}
+
+/* Scramble */
+.slots{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;direction:ltr;margin:6px 0 22px;min-height:56px}
+.slot,.tile{width:46px;height:52px;border:2.5px solid var(--line);border-radius:12px;display:grid;place-items:center;font-size:1.5rem;font-weight:700;text-transform:lowercase}
+.slot{background:color-mix(in srgb,var(--sun) 25%,var(--card))}
+.slot.empty{background:transparent;border-style:dashed}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;direction:ltr}
+.tile{background:var(--card);box-shadow:3px 3px 0 var(--line)}
+.tile.used{visibility:hidden}
+.row{display:flex;gap:10px;margin-top:20px}
+.ghost{flex:1;background:var(--card);border:2.5px solid var(--line);border-radius:14px;padding:11px;font-weight:500}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+
+/* Result */
+.result{text-align:center}
+.result .score{font-family:"Secular One",sans-serif;font-size:5rem;line-height:1;margin:14px 0 4px}
+.result .msg{font-size:1.25rem;margin-bottom:6px}
+.newbest{display:inline-block;background:var(--sun);color:#2A1858;border:2.5px solid var(--line);border-radius:999px;padding:4px 14px;transform:rotate(-4deg);font-family:"Secular One",sans-serif;margin:8px 0}
+.review{text-align:start;background:var(--card);border:2.5px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:20px}
+.review h2{font-size:1.15rem;margin-bottom:8px}
+.review ul{list-style:none;margin:0;padding:0}
+.review li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1.5px dashed color-mix(in srgb,var(--ink) 25%,transparent)}
+.review li:first-child{border-top:0}
+.review .en{font-weight:700}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:380px){.opts{grid-template-columns:1fr}.slot,.tile{width:40px;height:46px;font-size:1.3rem}}
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+
+<script>
+const VOCAB = [
+ ["achieve","להשיג"],["avoid","להימנע"],["borrow","לשאול (חפץ ממישהו)"],["brave","אמיץ"],["challenge","אתגר"],
+ ["confident","בטוח בעצמו"],["curious","סקרן"],["decide","להחליט"],["disappointed","מאוכזב"],["embarrassed","נבוך"],
+ ["environment","סביבה"],["exhausted","מותש"],["forgive","לסלוח"],["generous","נדיב"],["honest","כן, ישר"],
+ ["improve","לשפר"],["jealous","מקנא"],["journey","מסע"],["knowledge","ידע"],["lazy","עצלן"],
+ ["mention","להזכיר (בשיחה)"],["nervous","לחוץ, מתוח"],["opportunity","הזדמנות"],["opinion","דעה"],["patient","סבלני"],
+ ["prefer","להעדיף"],["proud","גאה"],["recognize","לזהות"],["reliable","אמין"],["suggest","להציע"],
+ ["support","לתמוך"],["surprised","מופתע"],["threat","איום"],["weird","מוזר"],["wonder","לתהות"],
+ ["worth","שווה"],["awkward","מביך, מסורבל"],["annoying","מעצבן"],["amazing","מדהים"],["crowd","קהל"],
+ ["afford","להרשות לעצמו (כסף)"],["argue","להתווכח"],["behave","להתנהג"],["complain","להתלונן"],["deserve","מגיע ל־, ראוי ל־"],
+ ["effort","מאמץ"],["fail","להיכשל"],["goal","מטרה"],["habit","הרגל"],["lonely","בודד"],
+ ["mistake","טעות"],["pretend","להעמיד פנים"],["rely","לסמוך על"],["shy","ביישן"],["skill","מיומנות"],
+ ["spread","להפיץ"],["upset","נסער"],["warn","להזהיר"],["guilty","אשם"],["grateful","אסיר תודה"]
+];
+
+const SENT = [
+ {s:"I was so ___ when I fell in front of the whole class.",a:"embarrassed",o:["generous","reliable","curious"],he:"הייתי כל כך נבוכה כשנפלתי מול כל הכיתה."},
+ {s:"She ___ to be asleep when her mom came in.",a:"pretended",o:["afforded","complained","deserved"],he:"היא העמידה פנים שהיא ישנה כשאמא שלה נכנסה."},
+ {s:"Can I ___ your charger? Mine is dead.",a:"borrow",o:["forgive","suggest","avoid"],he:"אפשר לשאול את המטען שלך? שלי מת."},
+ {s:"Practice every day and you will ___ your English.",a:"improve",o:["pretend","warn","behave"],he:"תתאמני כל יום ותשפרי את האנגלית שלך."},
+ {s:"He never lies. He is very ___.",a:"honest",o:["jealous","lazy","weird"],he:"הוא אף פעם לא משקר. הוא מאוד ישר."},
+ {s:"I can't ___ new shoes right now, they're too expensive.",a:"afford",o:["argue","spread","wonder"],he:"אני לא יכולה להרשות לעצמי נעליים חדשות עכשיו, הן יקרות מדי."},
+ {s:"You worked so hard. You ___ a break.",a:"deserve",o:["complain","borrow","pretend"],he:"עבדת כל כך קשה. מגיעה לך הפסקה."},
+ {s:"I didn't ___ you with your new haircut!",a:"recognize",o:["forgive","suggest","improve"],he:"לא זיהיתי אותך עם התספורת החדשה!"},
+ {s:"Don't be ___, just text him first!",a:"shy",o:["proud","exhausted","generous"],he:"אל תתביישי, פשוט תשלחי לו הודעה ראשונה!"},
+ {s:"My little brother keeps singing the same song. It's so ___.",a:"annoying",o:["amazing","reliable","curious"],he:"אחי הקטן שר כל הזמן את אותו שיר. זה כל כך מעצבן."},
+ {s:"After the 10 km hike we were completely ___.",a:"exhausted",o:["jealous","honest","patient"],he:"אחרי הטיול של 10 ק\"מ היינו מותשים לגמרי."},
+ {s:"Thanks for the gift, that's so ___ of you.",a:"generous",o:["awkward","lonely","lazy"],he:"תודה על המתנה, זה כל כך נדיב מצדך."},
+ {s:"Be ___, the bus will come soon.",a:"patient",o:["nervous","weird","upset"],he:"תהיי סבלנית, האוטובוס יגיע בקרוב."},
+ {s:"Making new friends is a big ___ when you move to a new school.",a:"challenge",o:["habit","crowd","threat"],he:"להכיר חברים חדשים זה אתגר גדול כשעוברים לבית ספר חדש."},
+ {s:"Is this movie ___ watching?",a:"worth",o:["lonely","brave","honest"],he:"הסרט הזה שווה צפייה?"},
+ {s:"I'm ___ about the test tomorrow, I didn't study enough.",a:"nervous",o:["generous","patient","reliable"],he:"אני לחוצה לקראת המבחן מחר, לא למדתי מספיק."},
+ {s:"Checking my phone first thing in the morning is a bad ___.",a:"habit",o:["goal","skill","journey"],he:"לבדוק את הטלפון דבר ראשון בבוקר זה הרגל רע."},
+ {s:"My ___ is to get 100 on the final exam.",a:"goal",o:["mistake","crowd","effort"],he:"המטרה שלי היא לקבל 100 במבחן הסופי."},
+ {s:"The ___ went crazy when the band came on stage.",a:"crowd",o:["opinion","knowledge","threat"],he:"הקהל השתגע כשהלהקה עלתה לבמה."},
+ {s:"She felt ___ after eating all the cookies alone.",a:"guilty",o:["grateful","brave","confident"],he:"היא הרגישה אשמה אחרי שאכלה לבד את כל העוגיות."},
+ {s:"I'm so ___ for your help, I couldn't do it without you.",a:"grateful",o:["guilty","jealous","awkward"],he:"אני כל כך אסירת תודה על העזרה שלך, לא הייתי מצליחה בלעדייך."},
+ {s:"Please don't ___ the rumor, it isn't true.",a:"spread",o:["achieve","prefer","rely"],he:"בבקשה אל תפיצי את השמועה, היא לא נכונה."}
+];
+
+const MODES = {
+  speed:{name:"מירוץ מילים",desc:"60 שניות. כמה מילים תתרגמי?",ico:"⚡",color:"var(--sun)"},
+  sentence:{name:"השלימי את המשפט",desc:"10 משפטים מהחיים, מילה אחת חסרה",ico:"💬",color:"var(--pink)"},
+  scramble:{name:"אותיות מבולגנות",desc:"סדרי את האותיות לפי הרמז בעברית",ico:"🔀",color:"var(--mint)"}
+};
+
+const $app = document.getElementById("app");
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function getBest(m){ try { return +(localStorage.getItem("efrat-best-"+m)||0); } catch(e){ return 0; } }
+function setBest(m,v){ try { localStorage.setItem("efrat-best-"+m,String(v)); } catch(e){} }
+
+function say(word){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word); u.lang="en-US"; u.rate=.9;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+let timer = null;
+function stopTimer(){ if(timer){clearInterval(timer);timer=null;} }
+
+/* ---------- Home ---------- */
+function home(){
+  stopTimer();
+  $app.innerHTML = `
+    <header class="hero">
+      <span class="sticker">16 ועולה</span>
+      <h1>אפרת<br>נגד האנגלית</h1>
+      <p>שלושה משחקים קצרים. בחרי אחד ותתחילי — הכי טוב שלך נשמר.</p>
+    </header>
+    <section class="modes">
+      ${Object.entries(MODES).map(([k,m])=>`
+        <button class="mode" data-m="${k}">
+          <span class="ico" style="background:${m.color}">${m.ico}</span>
+          <span><h2>${m.name}</h2><div class="desc">${m.desc}</div></span>
+          <span class="best">שיא<b>${getBest(k)}</b></span>
+        </button>`).join("")}
+    </section>`;
+  $app.querySelectorAll(".mode").forEach(b=>b.onclick=()=>({speed:startSpeed,sentence:startSentence,scramble:startScramble})[b.dataset.m]());
+}
+
+/* ---------- Speed ---------- */
+let S;
+function startSpeed(){
+  S = {score:0,streak:0,left:60,total:60,missed:[],last:null,lock:false,right:0};
+  speedQ();
+  const t0 = Date.now(); let base = 60;
+  timer = setInterval(()=>{
+    S.left = Math.max(0, base - (Date.now()-t0)/1000 - S.penalty);
+    updateBar();
+    if(S.left<=0){ stopTimer(); finish("speed",S.score,`תרגמת נכון ${S.right} מילים`,S.missed); }
+  },100);
+  S.penalty = 0;
+}
+function mult(){ return Math.min(4, 1 + Math.floor(S.streak/3)); }
+function updateBar(){
+  const bar = document.querySelector(".bar"); if(!bar) return;
+  bar.firstElementChild.style.width = (S.left/S.total*100)+"%";
+  bar.classList.toggle("low", S.left<10);
+  const t = document.getElementById("secs"); if(t) t.textContent = Math.ceil(S.left);
+}
+function speedQ(){
+  let w; do { w = VOCAB[Math.floor(Math.random()*VOCAB.length)]; } while (w===S.last);
+  S.last = w; S.lock=false;
+  const opts = shuffle([w[1], ...shuffle(VOCAB.filter(v=>v!==w)).slice(0,3).map(v=>v[1])]);
+  $app.innerHTML = `
+    <div class="top">
+      <button class="back" id="back">יציאה</button>
+      <span class="stat"><span id="secs">${Math.ceil(S.left)}</span> שנ׳</span>
+      <span class="stat">${S.score}${mult()>1?`<span class="combo">x${mult()}</span>`:""}</span>
+    </div>
+    <div class="bar"><i style="width:${S.left/S.total*100}%"></i></div>
+    <div class="word-card pop">
+      <button class="say" aria-label="השמעה">🔊</button>
+      <div class="big en">${esc(w[0])}</div>
+      <div class="sub">מה הפירוש?</div>
+    </div>
+    <div class="opts">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>`;
+  document.getElementById("back").onclick = home;
+  document.querySelector(".say").onclick = ()=>say(w[0]);
+  $app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(S.lock) return; S.lock=true;
+    if(b.textContent===w[1]){
+      b.classList.add("ok"); S.streak++; S.right++; S.score += 10*mult();
+      setTimeout(speedQ,280);
+    } else {
+      b.classList.add("no"); S.streak=0; S.penalty += 3;
+      $app.querySelectorAll(".opt").forEach(x=>{ if(x.textContent===w[1]) x.classList.add("ok"); });
+      if(!S.missed.some(m=>m[0]===w[0])) S.missed.push(w);
+      setTimeout(speedQ,900);
+    }
+  });
+  updateBar();
+}
+
+/* ---------- Sentence ---------- */
+function startSentence(){
+  S = {list:shuffle(SENT).slice(0,10),i:0,score:0,missed:[]};
+  sentQ();
+}
+function sentQ(){
+  const q = S.list[S.i];
+  const opts = shuffle([q.a,...q.o]);
+  const parts = q.s.split("___");
+  $app.innerHTML = `
+    <div class="top">
+      <button class="back" id="back">יציאה</button>
+      <span class="stat">${S.i+1} / ${S.list.length}</span>
+      <span class="stat">${S.score} ✓</span>
+    </div>
+    <div class="bar"><i style="width:${S.i/S.list.length*100}%"></i></div>
+    <div class="word-card pop">
+      <button class="say" aria-label="השמעה">🔊</button>
+      <div class="sentence en">${esc(parts[0])}<span class="gap" id="gap">&nbsp;</span>${esc(parts[1])}</div>
+      <div class="trans" id="trans"></div>
+    </div>
+    <div class="opts en">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>
+    <div id="nx"></div>`;
+  document.getElementById("back").onclick = home;
+  document.querySelector(".say").onclick = ()=>say(q.s.replace("___",q.a));
+  let done=false;
+  $app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(done) return; done=true;
+    const ok = b.textContent===q.a;
+    b.classList.add(ok?"ok":"no");
+    $app.querySelectorAll(".opt").forEach(x=>{ x.disabled=true; if(x.textContent===q.a) x.classList.add("ok"); });
+    if(ok) S.score++; else S.missed.push([q.a, q.he]);
+    document.getElementById("gap").textContent = q.a;
+    document.getElementById("trans").textContent = q.he;
+    const last = S.i===S.list.length-1;
+    document.getElementById("nx").innerHTML = `<button class="next">${last?"לתוצאה":"הבא"}</button>`;
+    const n = document.querySelector(".next"); n.focus();
+    n.onclick = ()=>{ if(last) finish("sentence",S.score,`מתוך ${S.list.length} משפטים`,S.missed,true); else { S.i++; sentQ(); } };
+  });
+}
+
+/* ---------- Scramble ---------- */
+function startScramble(){
+  const pool = VOCAB.filter(v=>v[0].length>=4 && v[0].length<=8);
+  S = {list:shuffle(pool).slice(0,8),i:0,score:0,missed:[]};
+  scrQ();
+}
+function scrQ(){
+  const w = S.list[S.i];
+  const letters = w[0].split("");
+  let order; do { order = shuffle(letters.map((c,i)=>i)); } while (order.every((v,i)=>v===i));
+  const st = {picked:[],hints:0,done:false};
+  function draw(){
+    const built = st.picked.map(i=>letters[i]);
+    $app.innerHTML = `
+      <div class="top">
+        <button class="back" id="back">יציאה</button>
+        <span class="stat">${S.i+1} / ${S.list.length}</span>
+        <span class="stat">${S.score} נק׳</span>
+      </div>
+      <div class="bar"><i style="width:${S.i/S.list.length*100}%"></i></div>
+      <div class="word-card">
+        <div class="sub">הרמז:</div>
+        <div class="big" style="font-size:clamp(1.7rem,8vw,2.4rem)">${esc(w[1])}</div>
+      </div>
+      <div class="slots" id="slots">
+        ${letters.map((_,k)=>k<built.length?`<button class="slot" data-k="${k}">${esc(built[k])}</button>`:`<span class="slot empty"></span>`).join("")}
+      </div>
+      <div class="tiles">
+        ${order.map(i=>`<button class="tile ${st.picked.includes(i)?"used":""}" data-i="${i}">${esc(letters[i])}</button>`).join("")}
+      </div>
+      <div class="row">
+        <button class="ghost" id="hint">רמז (‎-5)</button>
+        <button class="ghost" id="skip">דלגי</button>
+      </div>
+      <div id="nx"></div>`;
+    document.getElementById("back").onclick = home;
+    if(st.done) return;
+    $app.querySelectorAll(".tile").forEach(t=>t.onclick=()=>{ const i=+t.dataset.i; if(!st.picked.includes(i)){ st.picked.push(i); check(); } });
+    $app.querySelectorAll(".slot[data-k]").forEach(s=>s.onclick=()=>{ st.picked = st.picked.slice(0,+s.dataset.k); draw(); });
+    document.getElementById("hint").onclick = ()=>{
+      // keep correct prefix, then add the next correct letter
+      let k=0; while(k<st.picked.length && letters[st.picked[k]]===letters[k]) k++;
+      st.picked = st.picked.slice(0,k);
+      const next = order.find(i=>!st.picked.includes(i) && letters[i]===letters[k]);
+      if(next!==undefined){ st.picked.push(next); st.hints++; }
+      check();
+    };
+    document.getElementById("skip").onclick = ()=>{ S.missed.push(w); reveal(false); };
+  }
+  function check(){
+    if(st.picked.length<letters.length){ draw(); return; }
+    const guess = st.picked.map(i=>letters[i]).join("");
+    if(guess===w[0]){
+      S.score += Math.max(2, 10 - st.hints*5 + 5); // 15 clean, 10 with one hint, min 2
+      reveal(true);
+    } else {
+      draw();
+      const sl = document.getElementById("slots"); sl.classList.add("shake");
+      setTimeout(()=>{ st.picked=[]; draw(); },450);
+    }
+  }
+  function reveal(ok){
+    st.done=true; st.picked = letters.map((c,k)=>k);
+    // show the real word in the slots
+    draw();
+    document.getElementById("slots").innerHTML = letters.map(c=>`<span class="slot" style="background:${ok?"var(--mint)":"var(--sun)"};color:#13102A">${esc(c)}</span>`).join("");
+    document.querySelector(".tiles").innerHTML = "";
+    document.querySelector(".row").innerHTML = `<button class="ghost" id="sayw">🔊 איך אומרים</button>`;
+    document.getElementById("sayw").onclick = ()=>say(w[0]);
+    say(w[0]);
+    const last = S.i===S.list.length-1;
+    document.getElementById("nx").innerHTML = `<button class="next">${ok?"יפה! ":""}${last?"לתוצאה":"הבא"}</button>`;
+    const n=document.querySelector(".next"); n.focus();
+    n.onclick = ()=>{ if(last) finish("scramble",S.score,`${S.list.length-S.missed.length} מילים מתוך ${S.list.length}`,S.missed); else { S.i++; scrQ(); } };
+  }
+  draw();
+}
+
+/* ---------- Result ---------- */
+function finish(mode,score,line,missed){
+  stopTimer();
+  const prev = getBest(mode), isBest = score>prev;
+  if(isBest) setBest(mode,score);
+  const ratio = mode==="sentence" ? score/10 : null;
+  let msg = "יאללה, עוד סיבוב?";
+  if(mode==="sentence") msg = ratio>=.9?"מושלם כמעט. מלכה.":ratio>=.6?"יפה מאוד!":"עוד סיבוב וזה יושב.";
+  else if(score>=150) msg="וואו. את טילה.";
+  else if(score>=70) msg="יפה מאוד!";
+  $app.innerHTML = `
+    <div class="top"><button class="back" id="back">לתפריט</button><span></span></div>
+    <section class="result">
+      <h2 style="font-size:1.6rem">${MODES[mode].name}</h2>
+      <div class="score">${score}</div>
+      <div style="color:var(--muted)">${line}</div>
+      ${isBest && score>0 ? `<div class="newbest">שיא חדש!</div>` : ""}
+      <div class="msg">${msg}</div>
+      <button class="next" id="again">עוד פעם</button>
+      ${missed.length?`
+      <div class="review">
+        <h2>מילים לחזור עליהן</h2>
+        <ul>${missed.map(m=>`<li><span class="en">${esc(m[0])}</span><span>${esc(m[1])}</span></li>`).join("")}</ul>
+      </div>`:""}
+    </section>`;
+  document.getElementById("back").onclick = home;
+  document.getElementById("again").onclick = ({speed:startSpeed,sentence:startSentence,scramble:startScramble})[mode];
+}
+
+home();
+</script>
+</body>
+</html>
